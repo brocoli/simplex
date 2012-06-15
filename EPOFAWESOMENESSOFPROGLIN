@@ -1,18 +1,23 @@
 #! /usr/bin/octave -qf
 
-# m = num de linhas
-# n = num de colunas
-function simplex(A,b,c,m,n,print)
-	tableau = [1,-c',0;zeros(m,1),A,b]
-	# W = sum das variaveis novas. m - 1
-	#hugetableau = [            1,        zeros(1,n+1),      -ones(1,m),             0;
-#					zeros(m+1,1), tableau(:, [1:n+1]), eye(n)(:,[2:n]),tableau(:,n+2)]
+% m = num de linhas
+% n = num de colunas
 
-	hugetableau = [            1,      0, ones(1,m)*A,      zeros(1,m),             0;
-					zeros(m+1,1), tableau(:, [1:n+1]), eye(n)(:,[2:n]),tableau(:,n+2)]
+function simplex(A,b,c,m,n,print)
+	%make b positive, adjust A accordingly.
+	for i = 1:n
+		if b(i) < 0
+			b(i) = - b(1)
+			A(i,:) = -A(i,:)
+		endif
+	endfor
+
+	%build the phase1 tableau
+	cext = [zeros(1,n),ones(1,m)]
+	tableau = [-sum(b),cext;b,A,eye(m)]
     
 
-#	[ind x]
+%	[ind x]
 endfunction
 
 m = 2
