@@ -3,22 +3,62 @@
 % m = num de linhas
 % n = num de colunas
 
-function simplex(A,b,c,m,n,print)
+function [ind x] = simplex(A,b,c,m,n,print)
 	%make b positive, adjust A accordingly.
-	for i = 1:n
+	for i = 1:m
 		if b(i) < 0
 			b(i) = - b(1)
 			A(i,:) = -A(i,:)
 		endif
 	endfor
-
+	
 	%build the phase1 tableau
-	cext = [zeros(1,n),ones(1,m)]
+	cext = [-sum(A),zeros(1,m)]
 	tableau = [-sum(b),cext;b,A,eye(m)]
-    
+	
+	%do the phase 1 magic
+	[ind tableau] = runsimplex(tableau,m,n)
 
-%	[ind x]
+	x = 0
 endfunction
+
+function [ind tableau] = runsimplex(tableau,m,n)
+	%choose column
+	col = 2
+	while col <= n+m+1 && tableau(1,col) >= 0
+		++col
+	endwhile
+	
+	%THERESNOCOLUMN
+	if col > n+m+1
+		if tableau(1,1) < 0
+			ind = 1
+		else
+			ind = 0
+		endif
+		return
+	endif
+
+	%choose row
+	row = 0
+	minvalue = Inf
+	for j = 2:m+1
+		if tableau(col,j) > 0
+			t = tableau(j,1) / tableau(j,col)
+			if minvalue > t
+				row = j
+				minvalue = t
+			endif
+		endif
+	endfor
+	
+	if row == 0
+		ind = -1
+	endif
+	ind = 0
+endfunction
+
+% POR ; NA POARR TODA FOR MOAR SILENCE
 
 m = 2
 n = 3
