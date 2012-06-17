@@ -15,14 +15,15 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	%build the phase1 tableau
 	cext = [-sum(A),zeros(1,m)]
 	tableau = [-sum(b),cext;b,A,eye(m)]
+	basis = n+1:n+m
 	
 	%do the phase 1 magic
-	[ind tableau] = runsimplex(tableau,m,n)
+	[ind tableau] = runsimplex(1,tableau,m,n)
 
 	x = 0
 endfunction
 
-function [ind tableau] = runsimplex(tableau,m,n)
+function [ind tableau] = runsimplex(phase,tableau,m,n)
 	%choose column
 	col = 2
 	while col <= n+m+1 && tableau(1,col) >= 0
@@ -42,20 +43,31 @@ function [ind tableau] = runsimplex(tableau,m,n)
 	%choose row
 	row = 0
 	minvalue = Inf
-	for j = 2:m+1
-		if tableau(col,j) > 0
-			t = tableau(j,1) / tableau(j,col)
-			if minvalue > t
-				row = j
-				minvalue = t
+	for i = 2:m+1
+		if tableau(i,col) > 0
+			theta = tableau(i,1) / tableau(i,col)
+			if minvalue > theta
+				row = i
+				minvalue = theta
 			endif
 		endif
 	endfor
 	
 	if row == 0
 		ind = -1
+		return
 	endif
-	ind = 0
+	
+	%put 1 hear.
+	tableau(row,:) /= tableau(row,col)
+	
+	%put zeroes everywhear.
+	for i = 2:m+1
+		if i != row
+			tableau(i,:) -= tableau(i,col)*tableau(row,:)
+		endif
+	endfor
+	
 endfunction
 
 % POR ; NA POARR TODA FOR MOAR SILENCE
