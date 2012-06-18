@@ -30,14 +30,43 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	endif
 
 	%resolver problemas de vars artificiais na base
-	for bi = basis
-		if bi > n
-			if 0 %TODO check redundant restriction
-				%remove redundant restriction, ajeitando o tableau, basis, A, b, c, m, n
-			else %senao, temosquepivotarout
-				[basis tableau] = pivotaout(basis,tableau,bi,m,n) %TODO a funcao la em baixo
+	bi = 1
+	for varname = basis
+		if varname > n
+		
+			if sum(tableau(bi+1,2:n+1) == zeroes(n)) == n %redundant restriction
+				%remove redundant restriction, ajeitando o tableau, basis, A, b, m
+				basis(bi) = []
+				tableau(bi+1,:) = []
+				A(bi,:) = []
+				b(bi) = []
+				--m
+				
+				--bi
+				
+			else %forcefully remove this var from the basis.
+			
+				for newvar = 1:n
+					if tableau(1,newvar+1) != 0
+						break
+					endif
+				endfor
+				
+				%queremos que a variável varname (na linha bi+1 do tableau) saia da base, e que newvar entre.
+				%pivotando...
+				tableau(bi+1,:) /= tableau(bi+1,newvar+1)
+				
+				for i = 1:m+1
+					if i != bi+1
+						tableau(i,:) -= tableau(i,newvar+1)*tableau(bi+1,:)
+					endif
+				endfor
+				
+				basis(bi) = newvar
+				
 			endif
 		endif
+		++bi
 	endfor
 	
 	%ajeitar o tableau fase 2
@@ -109,13 +138,6 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 	endwhile
 	
 	
-endfunction
-
-function [basis tableau]= pivotaout(basis,tableau,bi,m,n)
-	
-	%TODO
-	%acha uma variavel básica por quem pivotar
-
 endfunction
 
 %TODO POR ; NA POARR TODA FOR MOAR SILENCE
