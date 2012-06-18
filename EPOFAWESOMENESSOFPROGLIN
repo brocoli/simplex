@@ -47,16 +47,18 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	
 	%VERIFICARSEESSAPOARRFUNFA.NAU.
 	tableau = [ tableau(2:m+1,1)' * reducaocusto , reducaocusto ;tableau(2:m+1,1:n+1)]
-	
+
+	%do the phase 2 magic	
 	[ind tableau basis] = runsimplex(basis,tableau,m,n)
-	%extrair o x
-	
-	x = 0
+
+	%TODO extrair o x
+	ind = 0
 endfunction
 
 function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 
 	while 1 %condição de saída é não achar nenhuma coluna onde melhorar.
+
 		%choose column
 		col = 2
 		while col <= n+m+1 && tableau(1,col) >= 0
@@ -86,7 +88,7 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 			endif
 		endfor
 		
-		if row == 0
+		if row == 0 % nenhuma linha tem um custo > 0. Posso andar infinitamente
 			ind = -1
 			return
 		endif
@@ -94,6 +96,7 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 		%uptade the basis vector with the new var, removing the old var
 		basis(row - 1) = col - 1
 		
+		%% pivotando...
 		%put 1 hear.
 		tableau(row,:) /= tableau(row,col)
 		
