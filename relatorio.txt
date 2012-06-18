@@ -36,20 +36,21 @@ Reduzindo ao máximo o custo_atual, chegamos a um valor ótimo no final da execu
 
 
 No entanto, precisamos de uma base inicial viável para poder rodar as iterações do simplex.
-Achamos uma base inicial adicionando variáveis artificiais para forçar uma base viável no problema,
-e fazemos com que o custo delas seja garantidamente superior ao das variáveis normais, por exemplo
-fazendo o custo das variáveis originais ser 0, e o das variáveis artificiais serem 1.
+Achamos uma base inicial adicionando variáveis artificiais para forçar a existencia de
+uma base viável no problema, e fazemos com que o custo delas seja garantidamente superior ao
+das variáveis normais, por exemplo fazendo o custo das variáveis originais ser 0,
+e o das variáveis artificiais serem 1.
 
-Rodamos o simplex na fase 1. Seguindo os custos definidos acima, verificamos se o custo desse PL auxiliar
-é de fato 0. Se o custo não for 0, então as variáveis artificiais são necessárias para que exista
-uma base viável, e portanto o PL original é inviável.
+Rodamos então o simplex na fase 1 com a base garantida. Seguindo os custos definidos acima,
+verificamos se o custo desse PL auxiliar é de fato 0. Se o custo não for 0, então as variáveis
+artificiais são necessárias para que exista uma base viável, e portanto o PL original é inviável.
 
 
 Após checar que o custo do PL auxiliar é 0, retiramos forçadamente quaisquer variáveis artificiais
 que possam ter continuado na base (checando aqui o possível caso de A ser LD).
 
-A base então obtida não contém nenhuma variável artificial, e é viável. Então usamos esta base para
-resolver o problema original, na fase 2 do algoritmo.
+A base então obtida na resolução da fase 1 não contém nenhuma variável artificial, e é viável.
+Usamos esta base como base inicial viável para resolver o problema original, na fase 2 do algoritmo.
 
 
 A remoção de uma variável e inserção de outra na base é feita por pivotamento do tableau.
@@ -58,7 +59,8 @@ o custo_reduzido, e o valor_das_variáveis através de pivotamento).
 
 Há algumas sutilezas quanto à execução dessa operação:
 1) Apenas inserimos na base variáveis com custo_reduzido negativo, assim o custo_atual diminui.
-2) Escolhemos a 1a variável possível como direção para andar (regra lexicográfica / do menor índice).
+2) Escolhemos a primeira variável possível como direção para andar 
+   (regra lexicográfica / do menor índice).
    Isto garante que nenhuma variável que já entrou na base entrará de novo,
    logo é uma regra de anti-ciclagem.
 3) Escolhemos o menor valor de theta para a variável que sai, assim andamos o máximo possível no
