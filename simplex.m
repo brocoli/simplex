@@ -85,6 +85,10 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	%do the phase 2 magic	
 	mahputs(print, "Simplex: Fase 2\n")
 	[ind tableau basis iter] = runsimplex(basis,tableau,m,n,print,0);
+	if ind == 1
+		ind = 0;
+	endif
+
 
 	mahtableau(print, tableau, m, n, basis, iter, [0,0]);
 	if ind != 0
