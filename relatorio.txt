@@ -1,0 +1,86 @@
+MAC0315 - Programação Linear - 1o sem. 2012
+
+Henrique Gemignani Passos Lima - 6879634
+Julio Felipe Angelini          - 6431610
+
+EP3 - Implementação do método Simplex
+
+
+
+Nosso EP implementa o método simplex para problemas no formato padrão:
+
+minimisar: c'x
+sujeito a: Ax = b
+           x >= 0
+
+onde: A é uma matriz m por n sobre R
+      c, x são vetores do Rn
+      b é um vetor do Rm
+
+
+Usamos o método do tableau com duas fases para realisá-lo.
+Segue uma descrição do algoritmo:
+
+
+O tableau é feito de forma que a cada iteração ele tenha esta forma:
+
+tableau =      custo_atual * -1        | custo_reduzido_em_cada_variável
+          ---------------------------------------------------------------
+                    .                  |           -1
+          valor_das_variáveis_na_base  |          B   * A
+                    .                  |
+
+onde B é a submatriz de A, das colunas da base.
+
+Reduzindo ao máximo o custo_atual, chegamos a um valor ótimo no final da execução.
+
+
+No entanto, precisamos de uma base inicial viável para poder rodar as iterações do simplex.
+Achamos uma base inicial adicionando variáveis artificiais para forçar uma base viável no problema,
+e fazemos com que o custo delas seja garantidamente superior ao das variáveis normais, por exemplo
+fazendo o custo das variáveis originais ser 0, e o das variáveis artificiais serem 1.
+
+Rodamos o simplex na fase 1. Seguindo os custos definidos acima, verificamos se o custo desse PL auxiliar
+é de fato 0. Se o custo não for 0, então as variáveis artificiais são necessárias para que exista
+uma base viável, e portanto o PL original é inviável.
+
+
+Após checar que o custo do PL auxiliar é 0, retiramos forçadamente quaisquer variáveis artificiais
+que possam ter continuado na base (checando aqui o possível caso de A ser LD).
+
+A base então obtida não contém nenhuma variável artificial, e é viável. Então usamos esta base para
+resolver o problema original, na fase 2 do algoritmo.
+
+
+A remoção de uma variável e inserção de outra na base é feita por pivotamento do tableau.
+Cada iteração destas custa O((m+1)(n+1)) flops (+1 pois também atualizamos o custo_atual * -1,
+o custo_reduzido, e o valor_das_variáveis através de pivotamento).
+
+Há algumas sutilezas quanto à execução dessa operação:
+1) Apenas inserimos na base variáveis com custo_reduzido negativo, assim o custo_atual diminui.
+2) Escolhemos a 1a variável possível como direção para andar (regra lexicográfica / do menor índice).
+   Isto garante que nenhuma variável que já entrou na base entrará de novo,
+   logo é uma regra de anti-ciclagem.
+3) Escolhemos o menor valor de theta para a variável que sai, assim andamos o máximo possível no
+   poliedro sem sair dele (mantendo a base viável).
+4) de (2) e (3), se encontrarmos uma variável com custo negativo, onde todas as entradas são negativas
+   então podemos aumentar infinitamente esta variável, e o custo ótimo é -infinito.
+
+
+Outros detalhes de implementação:
+
+- Mantemos um vetor basis, que satisfaz a seguinte identidade:
+  basis(i) == nome da variável básica na (i+1)-ésima linha do tableau
+  (i+1 pois o tableau tem uma linha extra, que guarda os custos).
+
+- No começo do problema, substituimos as linhas de A e de b, de forma que b >= 0.
+  Isto simplifica várias contas, como por exemplo o valor inicial do custo na fase 1, e
+  a verificação dos thetas ( basta verificar os (B^-1 * A)j ).
+
+- Ao passar da fase 1 para a fase 2, precisamos recalcular o custo_atual e o custo_reduzido.
+  Não precisamos inverter a B, ou resolver um sistema linear, pois já temos B^-1 * A em mãos.
+
+
+Seguem nos arquivos anexos exemplos de execuções do programa.
+
+
