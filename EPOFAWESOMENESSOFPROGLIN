@@ -34,7 +34,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	for varname = basis
 		if varname > n
 		
-			if sum(tableau(bi+1,2:n+1) == zeroes(n)) == n %redundant restriction
+			if sum(tableau(bi+1,2:n+1) == zeros(n)) == n %redundant restriction
 				%remove redundant restriction, ajeitando o tableau, basis, A, b, m
 				basis(bi) = []
 				tableau(bi+1,:) = []
@@ -142,9 +142,9 @@ endfunction
 
 %TODO POR ; NA POARR TODA FOR MOAR SILENCE
 
-m = 2
-n = 3
-A = [1, 2, 3; 4, 4, 5]
-b = [10; 10]
-c = [4; 3; 2]
+m = 4
+n = 4
+A = [1, 2, 3, 0; -1, 2, 6, 0; 0, 4, 9, 0; 0, 0, 3, 1]
+b = [3; 2; 5; 1]
+c = [1; 1; 1; 0]
 simplex(A, b, c, m, n, true)
