@@ -9,10 +9,23 @@ function mahputs(p, str)
 	endif
 endfunction
 
+function mahtableau(p, tableau, m, n, basis, iter, pivo)
+	if !p
+		return
+	endif
+	printf("Interação %d\n", iter);
+	printf("            |");
+	for i = [1:n]
+		printf(" x%6.d |")
+	endfor
+	printf("\n")
+endfunction
+
 function [ind x] = simplex(A,b,c,m,n,print)
 
 	%initialize x with dummy value
 	x = 0;
+	muheps = eps*1000; %instabilidade numérica faz zeros ficarem maiores que epsilon...
 	
 	%make b positive, adjust A accordingly.
 	for i = 1:m
@@ -31,7 +44,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	mahputs(print, "Simplex: Fase 1\n")
 	
 	%do the phase 1 magic
-	[ind tableau basis] = runsimplex(basis,tableau,m,n+m);
+	[ind tableau basis] = runsimplex(basis,tableau,m,n+m,print);
 	
 	%no solution? ohnoes...
 	if ind != 0
@@ -43,7 +56,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	for varname = basis
 		if varname > n
 		
-			if sum(abs(tableau(bi+1,2:n+1)) < eps) == n %redundant restriction
+			if sum(abs(tableau(bi+1,2:n+1)) < muheps) == n %redundant restriction
 				%remove redundant restriction, ajeitando o tableau, basis, A, b, m
 				basis(bi) = [];
 				tableau(bi+1,:) = [];
@@ -87,7 +100,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	
 	%do the phase 2 magic	
 	mahputs(print, "Simplex: Fase 2\n")
-	[ind tableau basis] = runsimplex(basis,tableau,m,n);
+	[ind tableau basis] = runsimplex(basis,tableau,m,n,print);
 
 	%extrair o x
 	x = zeros(n, 1);
@@ -95,7 +108,9 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	ind = 0;
 endfunction
 
-function [ind tableau basis] = runsimplex(basis,tableau,m,n)
+function [ind tableau basis] = runsimplex(basis,tableau,m,n,p)
+
+	muheps = eps*1000; % de novo.
 
 	while 1 %condição de saída é não achar nenhuma coluna onde melhorar.
 
@@ -132,6 +147,7 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 			ind = -1;
 			return
 		endif
+		mahtableau(p, tableau, m, n, basis, 1, 0);
 		
 		%uptade the basis vector with the new var, removing the old var
 		basis(row - 1) = col - 1;
@@ -147,7 +163,6 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 			endif
 		endfor
 	endwhile
-	
 	
 endfunction
 
