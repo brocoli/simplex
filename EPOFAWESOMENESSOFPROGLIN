@@ -4,6 +4,10 @@
 % n = num de colunas
 
 function [ind x] = simplex(A,b,c,m,n,print)
+
+	%initialize x with dummy value
+	x = 0
+	
 	%make b positive, adjust A accordingly.
 	for i = 1:m
 		if b(i) < 0
@@ -19,10 +23,32 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	
 	%do the phase 1 magic
 	[ind tableau basis] = runsimplex(basis,tableau,m,n)
+	
+	%no solution? ohnoes...
+	if ind != 0
+		return
+	endif
 
+	%resolver problemas de vars artificiais na base
+	for bi = basis
+		if bi > n
+			if 0 %TODO check redundant restriction
+				%remove redundant restriction, ajeitando o tableau, basis, A, b, c, m, n
+			else %senao, temosquepivotarout
+				[basis tableau] = pivotaout(basis,tableau,bi,m,n) %TODO a funcao la em baixo
+			endif
+		endif
+	endfor
+	
 	%ajeitar o tableau fase 2
-	%derp
-	%[ind tableau basis] = runsimplex(basis,tableau,m,n)
+	basismatrix = A(:,basis)
+	cb(1:m,1) = c(basis)
+	reducaocusto = basismatrix \ cb
+	
+	%VERIFICARSEESSAPOARRFUNFA.NAU.
+	tableau = [ tableau(2:m+1,1)' * reducaocusto , reducaocusto ;tableau(2:m+1,1:n+1)]
+	
+	[ind tableau basis] = runsimplex(basis,tableau,m,n)
 	%extrair o x
 	
 	x = 0
@@ -82,7 +108,14 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 	
 endfunction
 
-% POR ; NA POARR TODA FOR MOAR SILENCE
+function [basis tableau]= pivotaout(basis,tableau,bi,m,n)
+	
+	%TODO
+	%acha uma variavel básica por quem pivotar
+
+endfunction
+
+%TODO POR ; NA POARR TODA FOR MOAR SILENCE
 
 m = 2
 n = 3
