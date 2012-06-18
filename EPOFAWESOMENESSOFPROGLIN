@@ -18,7 +18,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	endfor
 	
 	%build the phase1 tableau
-	cext = [-sum(A),zeros(1,m)];
+	cext = [-sum(A, 1),zeros(1,m)];
 	tableau = [-sum(b),cext;b,A,eye(m)];
 	basis = n+1:n+m;
 	removedvars = 0;
@@ -87,6 +87,9 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	[ind tableau basis iter] = runsimplex(basis,tableau,m,n,print,0);
 
 	mahtableau(print, tableau, m, n, basis, iter, [0,0]);
+	if ind != 0
+		return
+	endif
 
 	%extrair o x
 	x = zeros(n, 1);
@@ -95,7 +98,6 @@ function [ind x] = simplex(A,b,c,m,n,print)
 		printf("\nSolução ótima encontrada com custo %.3f:\n", -tableau(1,1));
 		x
 	endif
-	ind = 0;
 endfunction
 
 function [ind tableau basis iter] = runsimplex(basis,tableau,m,n,p,iter)
@@ -111,7 +113,7 @@ function [ind tableau basis iter] = runsimplex(basis,tableau,m,n,p,iter)
 		while col <= n+1 && tableau(1,col) >= 0
 			++col;
 		endwhile
-		
+
 		%THERESNOCOLUMN
 		if col > n+1
 			if tableau(1,1) < -muheps
@@ -188,7 +190,7 @@ function mahtableau(p, tableau, m, n, basis, iter, pivo)
 	for i = 1:m
 		printf("x%-2.d %*.3f |", basis(i),7,tableau(i+1,1));
 		for j = 1:n
-			printf("%*.3f",7,tableau(i+1,j+1));%print B^-1 * A , tomando cuidado de achar o pivo.
+			printf("%*.3f",7,tableau(i+1,j+1));
 			if(pivo(1) == i && pivo(2) == j)
 				printf("*|");
 			else
