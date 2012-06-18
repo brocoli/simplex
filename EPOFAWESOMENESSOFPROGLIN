@@ -3,47 +3,6 @@
 % m = num de linhas
 % n = num de colunas
 
-function mahputs(p, str)
-	if p
-		puts(str);
-	endif
-endfunction
-
-function mahtableau(p, tableau, m, n, basis, iter, pivo)
-	if !p
-		return
-	endif
-	printf("Iteração %d\n", iter);
-	printf("            |");
-	for i = 1:n
-		printf(" x%-5.d |", i);
-	endfor
-	printf("\n");
-	printf("%*.3f |",11,tableau(1,1));
-	for i = 1:n
-		printf("%*.3f |",7,tableau(1,i+1));
-	endfor
-	printf("\n");
-	printf("-------------");
-	for i = 1:n
-		printf("---------");
-	endfor
-	printf("\n");
-	for i = 1:m
-		printf("x%-2.d %*.3f |", basis(i),7,tableau(i+1,1));
-		for j = 1:n
-			printf("%*.3f",7,tableau(i+1,j+1));%print B^-1 * A , tomando cuidado de achar o pivo.
-			if(pivo(1) == i && pivo(2) == j)
-				printf("*|");
-			else
-				printf(" |");
-			endif
-		endfor
-		printf("\n");
-	endfor
-	printf("\n\n");
-endfunction
-
 function [ind x] = simplex(A,b,c,m,n,print)
 
 	%initialize x with dummy value
@@ -67,7 +26,9 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	mahputs(print, "Simplex: Fase 1\n")
 	
 	%do the phase 1 magic
-	[ind tableau basis] = runsimplex(basis,tableau,m,n+m,print);
+	[ind tableau basis iter] = runsimplex(basis,tableau,m,n+m,print,0);
+
+	mahtableau(print, tableau, m, n+m, basis, iter, [0,0]);
 	
 	%no solution? ohnoes...
 	if ind != 0
@@ -108,7 +69,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 					endif
 				endfor
 				
-				basis(bi) = newvar;
+				basis(bi) = newvar
 				
 			endif
 		endif
@@ -123,9 +84,9 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	
 	%do the phase 2 magic	
 	mahputs(print, "Simplex: Fase 2\n")
-	[ind tableau basis] = runsimplex(basis,tableau,m,n,print);
+	[ind tableau basis iter] = runsimplex(basis,tableau,m,n,print,0);
 
-	mahtableau(print, tableau, m, n, basis, 1, 0);
+	mahtableau(print, tableau, m, n, basis, iter, [0,0]);
 
 	%extrair o x
 	x = zeros(n, 1);
@@ -133,11 +94,13 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	ind = 0;
 endfunction
 
-function [ind tableau basis] = runsimplex(basis,tableau,m,n,p)
+function [ind tableau basis iter] = runsimplex(basis,tableau,m,n,p,iter)
 
-	muheps = eps*1000; % de novo.
+	muheps = eps*1000; %de novo, problemas de estabilidade numérica.
 
 	while 1 %condição de saída é não achar nenhuma coluna onde melhorar.
+
+		++iter;
 
 		%choose column
 		col = 2;
@@ -168,20 +131,21 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n,p)
 			endif
 		endfor
 		
-		mahtableau(p, tableau, m, n, basis, 1, 0);
-		if row == 0 % nenhuma linha tem um custo > 0. Posso andar infinitamente
+		if row == 0 %nenhuma linha tem um custo > 0. Posso andar infinitamente
 			ind = -1;
 			return
 		endif
 		
+		mahtableau(p, tableau, m, n, basis, iter, [row-1,col-1]);
+
 		%uptade the basis vector with the new var, removing the old var
 		basis(row - 1) = col - 1;
 		
-		%% pivotando...
+		%pivotando...
 		%put 1 hear.
 		tableau(row,:) /= tableau(row,col);
 		
-		%put zeroes everywhear.
+		%put zeroes evriwhear else.
 		for i = 1:m+1
 			if i != row
 				tableau(i,:) -= tableau(i,col)*tableau(row,:);
@@ -191,11 +155,43 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n,p)
 	
 endfunction
 
-%TODO POR ; NA POARR TODA FOR MOAR SILENCE
+function mahputs(p, str)
+	if p
+		puts(str);
+	endif
+endfunction
 
-m = 4
-n = 4
-A = [1, 2, 3, 0; -1, 2, 6, 0; 0, 4, 9, 0; 0, 0, 3, 1]
-b = [3; 2; 5; 1]
-c = [1; 1; 1; 0]
-[ind x] = simplex(A, b, c, m, n, true)
+function mahtableau(p, tableau, m, n, basis, iter, pivo)
+	if !p
+		return
+	endif
+	printf("Iteração %d\n", iter);
+	printf("            |");
+	for i = 1:n
+		printf(" x%-5.d |", i);
+	endfor
+	printf("\n");
+	printf("%*.3f |",11,tableau(1,1));
+	for i = 1:n
+		printf("%*.3f |",7,tableau(1,i+1));
+	endfor
+	printf("\n");
+	printf("-------------");
+	for i = 1:n
+		printf("---------");
+	endfor
+	printf("\n");
+	for i = 1:m
+		printf("x%-2.d %*.3f |", basis(i),7,tableau(i+1,1));
+		for j = 1:n
+			printf("%*.3f",7,tableau(i+1,j+1));%print B^-1 * A , tomando cuidado de achar o pivo.
+			if(pivo(1) == i && pivo(2) == j)
+				printf("*|");
+			else
+				printf(" |");
+			endif
+		endfor
+		printf("\n");
+	endfor
+	printf("\n");
+endfunction
