@@ -92,7 +92,7 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 		endif
 		
 		%uptade the basis vector with the new var, removing the old var
-		basis(row) = col
+		basis(row - 1) = col - 1
 		
 		%put 1 hear.
 		tableau(row,:) /= tableau(row,col)
