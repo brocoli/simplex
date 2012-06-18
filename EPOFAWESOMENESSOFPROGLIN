@@ -13,19 +13,42 @@ function mahtableau(p, tableau, m, n, basis, iter, pivo)
 	if !p
 		return
 	endif
-	printf("Interação %d\n", iter);
+	printf("IteraÃ§Ã£o %d\n", iter);
 	printf("            |");
-	for i = [1:n]
-		printf(" x%6.d |")
+	for i = 1:n
+		printf(" x%-5.d |", i);
 	endfor
-	printf("\n")
+	printf("\n");
+	printf("%*.3f |",11,tableau(1,1));
+	for i = 1:n
+		printf("%*.3f |",7,tableau(1,i+1));
+	endfor
+	printf("\n");
+	printf("-------------");
+	for i = 1:n
+		printf("---------");
+	endfor
+	printf("\n");
+	for i = 1:m
+		printf("x%-2.d %*.3f |", basis(i),7,tableau(i+1,1));
+		for j = 1:n
+			printf("%*.3f",7,tableau(i+1,j+1));%print B^-1 * A , tomando cuidado de achar o pivo.
+			if(pivo(1) == i && pivo(2) == j)
+				printf("*|");
+			else
+				printf(" |");
+			endif
+		endfor
+		printf("\n");
+	endfor
+	printf("\n\n");
 endfunction
 
 function [ind x] = simplex(A,b,c,m,n,print)
 
 	%initialize x with dummy value
 	x = 0;
-	muheps = eps*1000; %instabilidade numérica faz zeros ficarem maiores que epsilon...
+	muheps = eps*1000; %instabilidade numÃ©rica faz zeros ficarem maiores que epsilon...
 	
 	%make b positive, adjust A accordingly.
 	for i = 1:m
@@ -75,7 +98,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 					endif
 				endfor
 				
-				%queremos que a variável varname (na linha bi+1 do tableau) saia da base, e que newvar entre.
+				%queremos que a variÃ¡vel varname (na linha bi+1 do tableau) saia da base, e que newvar entre.
 				%pivotando...
 				tableau(bi+1,:) /= tableau(bi+1,newvar+1);
 				
@@ -102,6 +125,8 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	mahputs(print, "Simplex: Fase 2\n")
 	[ind tableau basis] = runsimplex(basis,tableau,m,n,print);
 
+	mahtableau(print, tableau, m, n, basis, 1, 0);
+
 	%extrair o x
 	x = zeros(n, 1);
 	x(basis) = tableau(2:m+1,1);
@@ -112,7 +137,7 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n,p)
 
 	muheps = eps*1000; % de novo.
 
-	while 1 %condição de saída é não achar nenhuma coluna onde melhorar.
+	while 1 %condiÃ§Ã£o de saÃ­da Ã© nÃ£o achar nenhuma coluna onde melhorar.
 
 		%choose column
 		col = 2;
@@ -143,11 +168,11 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n,p)
 			endif
 		endfor
 		
+		mahtableau(p, tableau, m, n, basis, 1, 0);
 		if row == 0 % nenhuma linha tem um custo > 0. Posso andar infinitamente
 			ind = -1;
 			return
 		endif
-		mahtableau(p, tableau, m, n, basis, 1, 0);
 		
 		%uptade the basis vector with the new var, removing the old var
 		basis(row - 1) = col - 1;
