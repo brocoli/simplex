@@ -22,7 +22,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	basis = n+1:n+m
 	
 	%do the phase 1 magic
-	[ind tableau basis] = runsimplex(basis,tableau,m,n)
+	[ind tableau basis] = runsimplex(basis,tableau,m,n+m)
 	
 	%no solution? ohnoes...
 	if ind != 0
@@ -34,7 +34,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	for varname = basis
 		if varname > n
 		
-			if sum(tableau(bi+1,2:n+1) == zeros(n)) == n %redundant restriction
+			if sum(tableau(bi+1,2:n+1) == zeros(1, n)) == n %redundant restriction
 				%remove redundant restriction, ajeitando o tableau, basis, A, b, m
 				basis(bi) = []
 				tableau(bi+1,:) = []
@@ -70,17 +70,16 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	endfor
 	
 	%ajeitar o tableau fase 2
-	basismatrix = A(:,basis)
-	cb(1:m,1) = c(basis)
-	reducaocusto = basismatrix \ cb
+	cb = c(basis)
+	tableau(1, 2:n+1) = c' - cb'*tableau(2:m+1,2:n+1)
+	tableau(1,1) = -cb' * tableau(2:m+1,1)
+	tableau(:,n+2:n+m+2) = []
 	
-	%VERIFICARSEESSAPOARRFUNFA.NAU.
-	tableau = [ tableau(2:m+1,1)' * reducaocusto , reducaocusto ;tableau(2:m+1,1:n+1)]
-
 	%do the phase 2 magic	
 	[ind tableau basis] = runsimplex(basis,tableau,m,n)
 
-	%TODO extrair o x
+	%extrair o x
+	x = tableau(2:m+1,1)
 	ind = 0
 endfunction
 
@@ -90,12 +89,12 @@ function [ind tableau basis] = runsimplex(basis,tableau,m,n)
 
 		%choose column
 		col = 2
-		while col <= n+m+1 && tableau(1,col) >= 0
+		while col <= n+1 && tableau(1,col) >= 0
 			++col
 		endwhile
 		
 		%THERESNOCOLUMN
-		if col > n+m+1
+		if col > n+1
 			if tableau(1,1) < 0
 				ind = 1
 			else
