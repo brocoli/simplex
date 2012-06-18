@@ -20,9 +20,10 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	cext = [-sum(A),zeros(1,m)];
 	tableau = [-sum(b),cext;b,A,eye(m)];
 	basis = n+1:n+m;
+	removedvars = 0;
 	
 	%do the phase 1 magic
-	[ind tableau basis] = runsimplex(basis,tableau,m,n+m);
+	[ind tableau basis] = runsimplex(basis,tableau,m,n+m)
 	
 	%no solution? ohnoes...
 	if ind != 0
@@ -34,13 +35,14 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	for varname = basis
 		if varname > n
 		
-			if sum(tableau(bi+1,2:n+1) == zeros(1, n)) == n %redundant restriction
+			if sum(abs(tableau(bi+1,2:n+1)) < eps) == n %redundant restriction
 				%remove redundant restriction, ajeitando o tableau, basis, A, b, m
 				basis(bi) = [];
 				tableau(bi+1,:) = [];
 				A(bi,:) = [];
 				b(bi) = [];
 				--m;
+				++removedvars;
 				
 				--bi;
 				
@@ -73,13 +75,13 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	cb = c(basis);
 	tableau(1, 2:n+1) = c' - cb'*tableau(2:m+1,2:n+1);
 	tableau(1,1) = -cb' * tableau(2:m+1,1);
-	tableau(:,n+2:n+m+2) = [];
+	tableau(:,n+2:n+m+1+removedvars) = [];
 	
 	%do the phase 2 magic	
-	[ind tableau basis] = runsimplex(basis,tableau,m,n);
+	[ind tableau basis] = runsimplex(basis,tableau,m,n)
 
 	%extrair o x
-	x = tableau(2:m+1,1);
+	x = tableau(2:m+1,1)(basis);
 	ind = 0;
 endfunction
 
