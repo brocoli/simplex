@@ -12,7 +12,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	%make b positive, adjust A accordingly.
 	for i = 1:m
 		if b(i) < 0
-			b(i) = - b(1);
+			b(i) = -b(i);
 			A(i,:) = -A(i,:);
 		endif
 	endfor
@@ -69,7 +69,7 @@ function [ind x] = simplex(A,b,c,m,n,print)
 					endif
 				endfor
 				
-				basis(bi) = newvar
+				basis(bi) = newvar;
 				
 			endif
 		endif
@@ -91,6 +91,10 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	%extrair o x
 	x = zeros(n, 1);
 	x(basis) = tableau(2:m+1,1);
+	if print
+		printf("\nSolução ótima encontrada com custo %.3f:\n", -tableau(1,1));
+		x
+	endif
 	ind = 0;
 endfunction
 
@@ -110,7 +114,7 @@ function [ind tableau basis iter] = runsimplex(basis,tableau,m,n,p,iter)
 		
 		%THERESNOCOLUMN
 		if col > n+1
-			if tableau(1,1) < 0
+			if tableau(1,1) < -muheps
 				ind = 1;
 			else
 				ind = 0;
