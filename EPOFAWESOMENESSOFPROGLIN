@@ -3,6 +3,12 @@
 % m = num de linhas
 % n = num de colunas
 
+function mahputs(p, str)
+	if p
+		puts(str);
+	endif
+endfunction
+
 function [ind x] = simplex(A,b,c,m,n,print)
 
 	%initialize x with dummy value
@@ -21,9 +27,11 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	tableau = [-sum(b),cext;b,A,eye(m)];
 	basis = n+1:n+m;
 	removedvars = 0;
+
+	mahputs(print, "Simplex: Fase 1\n")
 	
 	%do the phase 1 magic
-	[ind tableau basis] = runsimplex(basis,tableau,m,n+m)
+	[ind tableau basis] = runsimplex(basis,tableau,m,n+m);
 	
 	%no solution? ohnoes...
 	if ind != 0
@@ -78,10 +86,12 @@ function [ind x] = simplex(A,b,c,m,n,print)
 	tableau(:,n+2:n+m+1+removedvars) = [];
 	
 	%do the phase 2 magic	
-	[ind tableau basis] = runsimplex(basis,tableau,m,n)
+	mahputs(print, "Simplex: Fase 2\n")
+	[ind tableau basis] = runsimplex(basis,tableau,m,n);
 
 	%extrair o x
-	x = tableau(2:m+1,1)(basis);
+	x = zeros(n, 1);
+	x(basis) = tableau(2:m+1,1);
 	ind = 0;
 endfunction
 
